@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/icn2you/fsf-hw10-bamazon-node-app#readme",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "inquirer": "^7.1.0",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.3"
