@@ -1,0 +1,32 @@
+{
+  "name": "fsf-hw10-bamazon-node-app",
+  "version": "0.1.0",
+  "description": "The Coding Boot Camp Homework 10: The Bamazon App (Node.js & MySQL)",
+  "main": "bamazon_mgr.js",
+  "scripts": {
+    "start": "nodemon bamazon_mgr.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icn2you/fsf-hw10-bamazon-node-app.git"
+  },
+  "keywords": [
+    "Bamazon",
+    "store",
+    "retail",
+    "shopping",
+    "marketplace"
+  ],
+  "author": "Christopher B. Zenner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/icn2you/fsf-hw10-bamazon-node-app/issues"
+  },
+  "homepage": "https://github.com/icn2you/fsf-hw10-bamazon-node-app#readme",
+  "dependencies": {
+    "inquirer": "^7.1.0",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.3"
+  }
+}
