@@ -4,7 +4,8 @@ const _ = require('lodash'),
       chalk = require('chalk'),
       inquirer = require('inquirer'),
       keys = require('./keys.js'),
-      mysql = require('mysql');
+      mysql = require('mysql'),
+      bamazon = chalk`{bold.hex('#FF8C00') bamazon}`;
 
 const conn = mysql.createConnection({
   host: 'localhost',
@@ -14,30 +15,50 @@ const conn = mysql.createConnection({
   database: 'bamazon_db'
 });
 
-conn.connect((err) => {
-  if (err) throw err;
+const getDeals = new Promise(async (resolve, reject) => {
+  try {
+    conn.connect((err) => {
+      if (err) throw err;
 
-  const welcomeMsg = chalk`Welcome to {bold.hex('#FF8C00') bamazon}, the online store for {italic all} your shopping needs!\nHere\'s a list of the incredible deals we have for you today:\n`;
+      const welcomeMsg = chalk`Welcome to ${bamazon}, the online store for {italic all} your shopping needs!\nHere\'s a list of the incredible deals we have for you today:\n`;
 
-  console.log(welcomeMsg);
+      console.log(welcomeMsg);
 
-  conn.query('SELECT item_id, product_name, price FROM products;', (err, res) => {
-    if (err) throw err;
+      conn.query('SELECT item_id, product_name, price FROM products;', (err, res) => {
+        if (err) throw err;
 
-    const itemNoHeader = chalk`{bold.hex('#C0C0C0').underline Item No.  }`,
-          productHeader = chalk`{bold.hex('#C0C0C0').underline Product                                                                 }`,
-          priceHeader = chalk`{bold.hex('#C0C0C0').underline Price     }`,
-          spacer = `     `;
+        const itemNoHeader = chalk`{bold.hex('#C0C0C0').underline Item No.  }`,
+              productHeader = chalk`{bold.hex('#C0C0C0').underline Product                                                                 }`,
+              priceHeader = chalk`{bold.hex('#C0C0C0').underline Price     }`,
+              spacer = `     `,
+              itemNos = [];
 
-    console.log(`${itemNoHeader}${spacer}${productHeader}${spacer}${priceHeader}`);
+        console.log(`${itemNoHeader}${spacer}${productHeader}${spacer}${priceHeader}`);
 
-    for (let row of res) {
-      const productName = chalk`{hex('#FFA500') ${_.padEnd(row.product_name.slice(0, 72), 72)}}`,
-            price = _.padStart(row.price, 9);
+        let productCount = 0;
 
-      console.log(`${row.item_id}${spacer}${productName}${spacer}$${price}`);
-    }
-  });
+        for (let row of res) {
+          const itemNo = row.item_id,
+                productName = chalk`{hex('#FFA500') ${_.padEnd(row.product_name.slice(0, 72), 72)}}`,
+                price = _.padStart(row.price, 9);
 
-  conn.end();
+          itemNos.push(itemNo);
+
+          console.log(`${itemNo}${spacer}${productName}${spacer}$${price}`);
+
+          productCount++;
+
+          if (productCount === res.length) {
+            console.log('');
+            resolve(`${bamazon} is open for business!`);
+          }
+        }
+      });
+
+      conn.end();
+    });
+  }
+  catch(err) {
+    reject(`${bamazon} has no deals for you today. `);
+  }
 });
