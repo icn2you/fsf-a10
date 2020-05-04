@@ -12,7 +12,7 @@
     "url": "git+https://github.com/icn2you/fsf-hw10-bamazon-node-app.git"
   },
   "keywords": [
-    "Bamazon",
+    "bamazon",
     "store",
     "retail",
     "shopping",
@@ -30,6 +30,7 @@
     "inquirer": "^7.1.0",
     "lodash": "^4.17.15",
     "mysql": "^2.18.1",
+    "node-emoji": "^1.10.0",
     "nodemon": "^2.0.3"
   }
 }
