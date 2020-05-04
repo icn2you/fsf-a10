@@ -1,4 +1,5 @@
-require('dotenv').config();
+// require('dotenv').config();
+require('dotenv').config({path: `${__dirname}/.env`});
 
 const _ = require('lodash'),
       chalk = require('chalk'),
@@ -28,7 +29,7 @@ const getDeals = new Promise(async (resolve, reject) => {
         if (err) throw err;
 
         const itemNoHeader = chalk`{bold.hex('#C0C0C0').underline Item No.  }`,
-              productHeader = chalk`{bold.hex('#C0C0C0').underline Product                                                                 }`,
+              productHeader = chalk`{bold.hex('#C0C0C0').underline Product                                   }`,
               priceHeader = chalk`{bold.hex('#C0C0C0').underline Price     }`,
               spacer = `     `,
               itemNos = [];
@@ -39,7 +40,7 @@ const getDeals = new Promise(async (resolve, reject) => {
 
         for (let row of res) {
           const itemNo = row.item_id,
-                productName = chalk`{hex('#FFA500') ${_.padEnd(row.product_name.slice(0, 72), 72)}}`,
+                productName = chalk`{hex('#FFA500') ${_.padEnd(row.product_name.slice(0, 42), 42)}}`,
                 price = _.padStart(row.price, 9);
 
           itemNos.push(itemNo);
@@ -50,7 +51,9 @@ const getDeals = new Promise(async (resolve, reject) => {
 
           if (productCount === res.length) {
             console.log('');
-            resolve(`${bamazon} is open for business!`);
+
+            // resolve(`${bamazon} is open for business!`);
+            resolve(itemNos);
           }
         }
       });
@@ -62,3 +65,51 @@ const getDeals = new Promise(async (resolve, reject) => {
     reject(`${bamazon} has no deals for you today. `);
   }
 });
+
+getDeals
+  .then((res) => {
+    const itemNos = res;
+
+    inquirer
+      .prompt([
+        {
+          name: 'itemNo',
+          message: 'What is the Item No. of the product you wish to buy?',
+          type: 'input',
+          validate: (itemNo) => {
+            return (itemNos.indexOf(_.parseInt(itemNo)) >= 0) || 
+              chalk`{red Invalid Item No. entered.}`;
+          },
+        },
+        {
+          name: 'quantity',
+          message: 'How many do you wish to buy?',
+          type: 'input',
+          validate: (quantity) => {
+            const regEx = /^\d+$/;
+            
+            return (regEx.test(quantity) && quantity > 0) || 
+              chalk`{red Invalid quantity specified!}`;
+          },
+        },
+      ])
+      .then((ans) => {
+        console.log(ans);
+
+        if (itemNos.indexOf(itemNo) < 0)
+          throw chalk`{red Invalid Item No. entered.}`;
+
+        if (quantity < 0)
+          throw chalk`{red Invalid quantity specified!}`;
+
+      })
+      .catch((err) => {
+        if(err.isTtyError) {
+          // Prompt couldn't be rendered in the current environment
+        } else {
+          // Something else when wrong
+        }
+      });
+  }, (err) => {
+    console.error(err);
+  });
