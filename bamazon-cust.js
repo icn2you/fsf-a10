@@ -108,9 +108,9 @@ const qs = new Promise(async (resolve, reject) => {
 
       try {
         const itemID = _.parseInt(res.itemNo),
-              qty = res.quantity;
+              qty = _.parseInt(res.quantity);
 
-        let query = 'SELECT stock_quantity FROM products WHERE ?'; 
+        let query = 'SELECT stock_quantity, price FROM products WHERE ?'; 
 
         conn.query(query, { item_id: itemID }, (err, res) => {
           if (err) throw err;
@@ -118,6 +118,11 @@ const qs = new Promise(async (resolve, reject) => {
           const stock = _.parseInt(res[0].stock_quantity);
 
           if (stock > qty) {
+            custOrder.itemNo = itemID;
+            custOrder.quantity = qty;
+            custOrder.stock = stock;
+            custOrder.price = res[0].price;
+
             resolve(custOrder);
           }
           else {
@@ -131,11 +136,41 @@ const qs = new Promise(async (resolve, reject) => {
     });
 });
 
-qs
+const successfulOrder = new Promise((resolve, reject) => {
+  qs
+    .then((res) => {
+      const newStockQty = res.stock - res.quantity,
+            orderTotal = res.quantity * res.price;
+      
+      try {
+        let query = 'UPDATE products SET ? WHERE ?'; 
+
+        conn.query(query, [{ stock_quantity: newStockQty }, { item_id: res.itemNo }], (err, res) => {
+          if (err) throw err;     
+
+          if (res.changedRows === 1) {
+            resolve(chalk`{green Your order has been successfully placed! Your total is $${orderTotal}. Please visit again soon!}`);
+          }
+          else if (res.changedRows > 0) {
+            throw chalk`{red Something strange happened. Please contact the ${bamazon} CEO, Geoff Zebos, immediately! }`;
+          }
+          else {
+            throw chalk`{red Insufficient quantity to fulfill your order. Check back again soon!}`;
+          }
+        });
+
+        conn.end();
+      }
+      catch(err) {
+        reject(err);
+      }
+    });
+});
+
+successfulOrder
   .then((res) => {
     console.log(res);
   })
   .catch((err) => {
     console.err(err);
   });
-
