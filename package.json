@@ -2,9 +2,9 @@
   "name": "fsf-hw10-bamazon-node-app",
   "version": "0.1.0",
   "description": "The Coding Boot Camp Homework 10: The Bamazon App (Node.js & MySQL)",
-  "main": "bamazon-mgr.js",
+  "main": "bamazon-cust.js",
   "scripts": {
-    "start": "nodemon bamazon-mgr.js",
+    "start": "nodemon bamazon-cust.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
