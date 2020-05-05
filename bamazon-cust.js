@@ -16,7 +16,7 @@ const conn = mysql.createConnection({
   database: 'bamazon_db'
 });
 
-const getStoreDeals = new Promise(async (resolve, reject) => {
+const storeDeals = new Promise(async (resolve, reject) => {
   try {
     conn.connect((err) => {
       if (err) throw err;
@@ -64,8 +64,8 @@ const getStoreDeals = new Promise(async (resolve, reject) => {
   }
 });
 
-const getCustOrder = new Promise((resolve, reject) => {
-  getStoreDeals
+const custOrder = new Promise((resolve, reject) => {
+  storeDeals
     .then((res) => {
       const itemNos = res;
 
@@ -101,8 +101,8 @@ const getCustOrder = new Promise((resolve, reject) => {
     });
 });
 
-const isQuantitySufficient = new Promise(async (resolve, reject) => {
-  getCustOrder
+const qs = new Promise(async (resolve, reject) => {
+  custOrder
     .then((res) => {
       const custOrder = res;
 
@@ -131,7 +131,7 @@ const isQuantitySufficient = new Promise(async (resolve, reject) => {
     });
 });
 
-isQuantitySufficient
+qs
   .then((res) => {
     console.log(res);
   })
