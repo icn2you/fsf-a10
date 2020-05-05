@@ -3,6 +3,7 @@ require('dotenv').config({path: `${__dirname}/.env`});
 
 const _ = require('lodash'),
       chalk = require('chalk'),
+      emoji = require('node-emoji'),
       inquirer = require('inquirer'),
       keys = require('./keys.js'),
       mysql = require('mysql'),
@@ -60,7 +61,7 @@ const storeDeals = new Promise(async (resolve, reject) => {
     });
   }
   catch(err) {
-    reject(`${bamazon} has no deals for you today. `);
+    reject(emoji.emojify(`${bamazon} has no deals for you today. :no_entry_sign:`));
   }
 });
 
@@ -115,7 +116,8 @@ const qs = new Promise(async (resolve, reject) => {
         conn.query(query, { item_id: itemID }, (err, res) => {
           if (err) throw err;
 
-          const stock = _.parseInt(res[0].stock_quantity);
+          const stock = _.parseInt(res[0].stock_quantity),
+                qnsErrMsg = emoji.emojify(chalk`{bold.yellow Insufficient quantity to fulfill your order. Check back again soon!} :-1: \n`);;
 
           if (stock > qty) {
             custOrder.itemNo = itemID;
@@ -126,7 +128,7 @@ const qs = new Promise(async (resolve, reject) => {
             resolve(custOrder);
           }
           else {
-            throw chalk`{red Insufficient quantity to fulfill your order. Check back again soon!}`;
+            throw qnsErrMsg;
           }
         });
       }
@@ -146,16 +148,17 @@ const successfulOrder = new Promise((resolve, reject) => {
         let query = 'UPDATE products SET ? WHERE ?'; 
 
         conn.query(query, [{ stock_quantity: newStockQty }, { item_id: res.itemNo }], (err, res) => {
-          if (err) throw err;     
+          if (err) throw err;
+          
+          const successMsg = 
+                emoji.emojify(chalk`{bold.green Your order has been successfully placed! Your total is $${orderTotal}. Please visit again soon!} :shopping_bags:\n`),
+                dbErrMsg = emoji.emojify(chalk`{red Something strange happened. Please contact the ${bamazon} CEO, Geoff Zebos, immediately!} :flushed:\n`);
 
           if (res.changedRows === 1) {
-            resolve(chalk`{green Your order has been successfully placed! Your total is $${orderTotal}. Please visit again soon!}`);
-          }
-          else if (res.changedRows > 0) {
-            throw chalk`{red Something strange happened. Please contact the ${bamazon} CEO, Geoff Zebos, immediately! }`;
+            resolve(successMsg);
           }
           else {
-            throw chalk`{red Insufficient quantity to fulfill your order. Check back again soon!}`;
+            throw dbErrMsg;
           }
         });
 
