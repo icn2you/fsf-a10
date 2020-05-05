@@ -66,11 +66,12 @@ const getDeals = new Promise(async (resolve, reject) => {
   }
 });
 
-getDeals
-  .then((res) => {
-    const itemNos = res;
+const getCustOrder = new Promise((resolve, reject) => {
+  getDeals
+    .then((res) => {
+      const itemNos = res;
 
-    inquirer
+      inquirer
       .prompt([
         {
           name: 'itemNo',
@@ -94,22 +95,31 @@ getDeals
         },
       ])
       .then((ans) => {
-        console.log(ans);
-
+        // DEBUG:
+        // console.log(ans);
+  
+        /* These checks are no longer necessary due to
+          input validation.
         if (itemNos.indexOf(itemNo) < 0)
           throw chalk`{red Invalid Item No. entered.}`;
-
+  
         if (quantity < 0)
-          throw chalk`{red Invalid quantity specified!}`;
-
+          throw chalk`{red Invalid quantity specified!}`; */
+  
+        resolve(ans);
       })
       .catch((err) => {
-        if(err.isTtyError) {
-          // Prompt couldn't be rendered in the current environment
-        } else {
-          // Something else when wrong
-        }
+        reject(err);
       });
-  }, (err) => {
+    }, (err) => {
+      throw err;
+    });
+});
+
+getCustOrder
+  .then((res) => {
+    console.log(res);
+  }).catch((err) => {
     console.error(err);
   });
+
