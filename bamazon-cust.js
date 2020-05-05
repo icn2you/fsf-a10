@@ -16,7 +16,7 @@ const conn = mysql.createConnection({
   database: 'bamazon_db'
 });
 
-const getDeals = new Promise(async (resolve, reject) => {
+const getStoreDeals = new Promise(async (resolve, reject) => {
   try {
     conn.connect((err) => {
       if (err) throw err;
@@ -57,8 +57,6 @@ const getDeals = new Promise(async (resolve, reject) => {
           }
         }
       });
-
-      conn.end();
     });
   }
   catch(err) {
@@ -67,7 +65,7 @@ const getDeals = new Promise(async (resolve, reject) => {
 });
 
 const getCustOrder = new Promise((resolve, reject) => {
-  getDeals
+  getStoreDeals
     .then((res) => {
       const itemNos = res;
 
@@ -95,31 +93,49 @@ const getCustOrder = new Promise((resolve, reject) => {
         },
       ])
       .then((ans) => {
-        // DEBUG:
-        // console.log(ans);
-  
-        /* These checks are no longer necessary due to
-          input validation.
-        if (itemNos.indexOf(itemNo) < 0)
-          throw chalk`{red Invalid Item No. entered.}`;
-  
-        if (quantity < 0)
-          throw chalk`{red Invalid quantity specified!}`; */
-  
         resolve(ans);
       })
       .catch((err) => {
         reject(err);
       });
-    }, (err) => {
-      throw err;
     });
 });
 
-getCustOrder
+const isQuantitySufficient = new Promise(async (resolve, reject) => {
+  getCustOrder
+    .then((res) => {
+      const custOrder = res;
+
+      try {
+        const itemID = _.parseInt(res.itemNo),
+              qty = res.quantity;
+
+        let query = 'SELECT stock_quantity FROM products WHERE ?'; 
+
+        conn.query(query, { item_id: itemID }, (err, res) => {
+          if (err) throw err;
+
+          const stock = _.parseInt(res[0].stock_quantity);
+
+          if (stock > qty) {
+            resolve(custOrder);
+          }
+          else {
+            throw chalk`{red Insufficient quantity to fulfill your order. Check back again soon!}`;
+          }
+        });
+      }
+      catch(err) {
+        reject(err);
+      }
+    });
+});
+
+isQuantitySufficient
   .then((res) => {
     console.log(res);
-  }).catch((err) => {
-    console.error(err);
+  })
+  .catch((err) => {
+    console.err(err);
   });
 
