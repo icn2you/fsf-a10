@@ -4,8 +4,9 @@
   "description": "The Coding Boot Camp Homework 10: The Bamazon App (Node.js & MySQL)",
   "main": "bamazon-cust.js",
   "scripts": {
+    "run": "node bamazon-cust.js",
     "start": "nodemon bamazon-cust.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --trace-warnings bamazon-cust.js"
   },
   "repository": {
     "type": "git",
