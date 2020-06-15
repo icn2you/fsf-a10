@@ -105,3 +105,6 @@ dist
 
 # Zip archives
 *.zip
+
+# Bjorn's refactor
+bamazon-cust-bn.js
